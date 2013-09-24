@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <title>HTML5 - Der Zyklische Zelluläre Automat</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Thomas Wöhlke"/>
+    <meta name="description" content="Der zelluläre Automat 'cyclic cellular automaton' von David Griffeath in HTML5"/>
+    <link rel="stylesheet" href="cca.css">
+    <script src="cca.js"></script>
+</head>
+<body>
+<h1>Der Zyklische Zelluläre Automat</h1>
+<canvas id="fraktal" width="600" height="400"></canvas>
+<br/>
+
+<p>Der zelluläre Automat »cyclic cellular automaton« von David Griffeath funktioniert nach folgendem Prinzip:
+    Der Zustand einer Zelle – repräsentiert durch die Nummern 0 bis n – 1, n ist die Anzahl der möglichen Zustände –
+    wird im nächsten Zyklus um eins erhöht, wenn einer ihrer vier Nachbarn sich in diesem um eins höheren Zustand befindet.
+    Dem entsprechend wird n – 1 zu 0, wenn eine der Nachbarzellen den Zustand 0 besitzt.
+    Die gegenüberliegenden Ränder des Zellgitters sind miteinander verbunden.</p>
+
+<h2>Benutzte HTML5-Konstrukte</h2>
+<ul>
+    <li><a href="http://de.wikipedia.org/wiki/Canvas_%28HTML-Element%29" title="HTML5 Canvas">Canvas</a></li>
+    <li><a href="http://en.wikipedia.org/wiki/Web_worker" title="HTML5 Web Worker">Web Worker</a></li>
+</ul>
+
+<h2>Literatur</h2>
+
+<p>Spektrum der Wissenschaft, Oktober 1989, S. 10</p>
+
+<h2>Links</h2>
+<ul>
+    <li><a href="http://de.wikipedia.org/wiki/Zellulärer_Automat">de.wikipedia.org/wiki/Zellulärer_Automat</a></li>
+    <li><a href="http://en.wikipedia.org/wiki/Cyclic_cellular_automaton">en.wikipedia.org/wiki/Cyclic_cellular_automaton</a></li>
+</ul>
+
+</body>
+</html>
