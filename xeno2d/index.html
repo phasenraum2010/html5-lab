@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <title>Xeno 2D: Ein Rudel Schildkröten namens Archilles</title>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Thomas Wöhlke"/>
+    <meta name="description" content="Mäuseglück in HTML5"/>
+    <style>
+        * {
+            font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+        }
+
+        canvas {
+            display: block;
+            border: 1px solid black;
+        }
+
+        p {
+            width: 600px;
+        }
+    </style>
+</head>
+<body>
+<h1>Xeno 2D</h1>
+<h2>Ein Rudel Schildkröten namens Archilles</h2>
+<canvas id="mice" width="600" height="600"></canvas>
+<button id="start" name="Start">Start</button>
+<br/>
+
+<script>
+    var canvas;
+    var ktx;
+    var points = [];
+    var btn;
+
+    var perCent = 20;
+
+    function calculateNextLines(){
+        var goOn = true;
+        var newpoints = [];
+        var firstpoint = points.shift();
+        var startpoint = { x:firstpoint.x,y:firstpoint.y};
+        var point;
+        while(points.length>0){
+            point = points.shift();
+            var deltax = point.x - firstpoint.x;
+            var deltay = point.y - firstpoint.y;
+            if(deltax*deltax+deltay*deltay < 10){
+                goOn = false;
+            }
+            firstpoint.x += (deltax / perCent);
+            firstpoint.y += (deltay / perCent);
+            newpoints.push(firstpoint);
+            firstpoint = point;
+        }
+        var deltax = startpoint.x - point.x;
+        var deltay = startpoint.y - point.y;
+        if(deltax*deltax+deltay*deltay < 10){
+            goOn = false;
+        }
+        point.x += (deltax / perCent);
+        point.y += (deltay / perCent);
+        newpoints.push(point);
+        points = newpoints;
+        return goOn;
+    }
+
+    function draw(ktx){
+        var newpoints = [];
+        ktx.beginPath();
+        var firstpoint = points.shift();
+        newpoints.push(firstpoint);
+        ktx.moveTo(firstpoint.x,firstpoint.y);
+        while(points.length>0){
+            var point = points.shift();
+            ktx.lineTo(point.x,point.y);
+            newpoints.push(point);
+        }
+        ktx.lineTo(firstpoint.x,firstpoint.y);
+        ktx.stroke();
+        ktx.closePath();
+        points = newpoints;
+    }
+
+    function drawLines(event){
+        ktx = canvas.getContext("2d");
+        ktx.fillStyle = "rgb(255,255,255)";
+        ktx.clearRect(0,0,canvas.width,canvas.height);
+        ktx.fillStyle = "rgb(0,0,0)";
+        if(points.length>0){
+            var goOn = true;
+            while(goOn){
+                draw(ktx);
+                goOn = calculateNextLines();
+            }
+        }
+        points = [];
+    }
+
+    window.onload = function(){
+        canvas = document.getElementById("mice");
+        ktx = canvas.getContext("2d");
+        ktx.fillStyle = "rgb(0,0,0)";
+        canvas.addEventListener('click', function(event) {
+            var x = event.pageX - canvas.offsetLeft,
+                y = event.pageY - canvas.offsetTop;
+            ktx = canvas.getContext("2d");
+            ktx.fillStyle = "rgb(0,0,0)";
+            ktx.fillRect(x,y,1,1);
+            var point = { x:x, y:y};
+            points.push(point);
+        }, false);
+
+        btn = document.getElementById("start");
+        btn.addEventListener('click', drawLines ,false);
+
+    }
+</script>
+</body>
+</html>
+
