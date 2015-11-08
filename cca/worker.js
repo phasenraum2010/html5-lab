@@ -37,6 +37,6 @@ function step(job){
 
 onmessage = function (event) {
     var job = event.data;
-    job = this.step(job);
+    job = step(job);
     this.postMessage(job);
 }
