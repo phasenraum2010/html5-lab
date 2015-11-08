@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <title>HTML5 - Mandelbrot-Menge</title>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Thomas Wöhlke"/>
+    <meta name="description" content="Der zelluläre Automat 'cyclic cellular automaton' von David Griffeath in HTML5"/>
+    <style>
+        * {
+            font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+        }
+
+        canvas {
+            display: block;
+            border: 1px solid black;
+        }
+
+        p {
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+<h1>Mandelbrot-Menge</h1>
+<canvas id="mandelbrot" width="320" height="234"></canvas>
+<br/>
+<script>
+    var canvas;
+    var ktx;
+
+    function sleep(milliseconds) {
+        var e = new Date().getTime() + (milliseconds);
+        while (new Date().getTime() <= e) {}
+    }
+
+    var ComplexNumber = function (real,img){
+        this.real=real;
+        this.img=img;
+        this.realZ=0.0;
+        this.imgZ=0.0;
+        this.computeMandelbrotIterations = function (maxIterations) {
+            var i = 0;
+            this.realZ=0.0;
+            this.imgZ=0.0;
+            var newRealZ;
+            var newImgZ;
+            do {
+                newRealZ = this.realZ*this.realZ - this.imgZ*this.imgZ + this.real;
+                newImgZ  = 2.0 * this.realZ*this.imgZ + this.img;
+                this.realZ=newRealZ;
+                this.imgZ=newImgZ;
+                i++;
+            } while ( (maxIterations > i)  && (this.isNotDivergent()) );
+            return i;
+        };
+        this.isNotDivergent = function (){
+            return (( this.realZ*this.realZ + this.imgZ*this.imgZ ) < 4.0);
+        };
+    };
+
+    var Phase = { GO_TO_SET:0, WALK_AROUND:1, FILL_THE_INSIDE:2, COLOR_THE_OUTSIDE:3, ALL_DONE:4 };
+
+    var Direction = { UP:0, RIGHT:1, DOWN:2, LEFT:3 };
+
+    var Point = function(x,y){
+        this.x = x;
+        this.y = y;
+        return this;
+    };
+
+    function verpacken(x) {
+        x = ((x + 256) & 0x1ff) - 256;
+        if (x < 0) x = -x;
+        return x;
+    }
+
+    var data = {
+        palette :   [],
+        lattice:    [],
+        current:    0,
+        MAX_X:      320,
+        MAX_Y:      234,
+        MAX_ITERATIONS: 32,
+        YET_UNCOMPUTED: -1,
+        steps: 0,
+        turingPhase : Phase.GO_TO_SET,
+        direction : Direction.LEFT,
+        turingPosition : new Point(0,0),
+        firstSetPosition: new Point(0,0),
+        init: function () {
+            this.turingPosition = new Point((this.MAX_X-2),((this.MAX_Y/2)-11));
+            for(var x=0;x<this.MAX_X;x++){
+                this.lattice[x] = [];
+                for(var y=0;y<this.MAX_Y;y++){
+                    this.lattice[x][y] = this.YET_UNCOMPUTED;
+                }
+            }
+            for (var i = 0; i <= this.MAX_ITERATIONS; i++) {
+                this.palette.push([verpacken(0), verpacken(0), verpacken((256/this.MAX_ITERATIONS)*i)]);
+            }
+        },
+        paint: function () {
+            for(var x=0;x<data.MAX_X;x++){
+                for(var y=0;y<data.MAX_Y;y++) {
+                    var myvalue = data.lattice[x][y];
+                    if (myvalue > 0) {
+                        var red = data.palette[myvalue][0];
+                        var green = data.palette[myvalue][1];
+                        var blue = data.palette[myvalue][2];
+                        ktx.fillStyle = "rgb(" + red + "," + green + "," + blue + ")";
+                    } else {
+                        ktx.fillStyle = "rgb(0,0,0)";
+                    }
+                    ktx.fillRect(x,y,1,1);
+                }
+            }
+        },
+        step: function(){
+            switch(this.turingPhase){
+                case Phase.GO_TO_SET: this.stepGoToSet(); break;
+                case Phase.WALK_AROUND: this.stepWalkAround(); break;
+                case Phase.FILL_THE_INSIDE: this.fillTheInside(); break;
+                case Phase.COLOR_THE_OUTSIDE: this.colorTheOutside(); break;
+                case Phase.ALL_DONE: break;
+            }
+        },
+        stepGoToSet: function(){
+            var i  = this.getComplexNumberFromLatticeCoordsForMandelbrot(this.turingPosition.x,this.turingPosition.y).computeMandelbrotIterations(this.MAX_ITERATIONS);
+            var iterations = i.valueOf();
+            if(this.MAX_ITERATIONS===iterations){
+                this.lattice[this.turingPosition.x][this.turingPosition.y]=0;
+                this.firstSetPosition = new Point(this.turingPosition.x,this.turingPosition.y);
+                this.turingPhase = Phase.WALK_AROUND;
+            } else {
+                this.lattice[this.turingPosition.x][this.turingPosition.y]=iterations;
+                this.turingPosition.x = this.turingPosition.x - 1;
+            }
+        },
+        stepWalkAround : function(){
+            var i  = this.getComplexNumberFromLatticeCoordsForMandelbrot(this.turingPosition.x,this.turingPosition.y).computeMandelbrotIterations(this.MAX_ITERATIONS);
+            var iterations = i.valueOf();
+            if(this.MAX_ITERATIONS===iterations){
+                this.lattice[this.turingPosition.x][this.turingPosition.y]=0;
+                this.turnRight();
+            } else {
+                this.lattice[this.turingPosition.x][this.turingPosition.y]=iterations;
+                var red = this.palette[iterations][0];
+                var green = this.palette[iterations][1];
+                var blue = this.palette[iterations][2];
+                ktx.fillStyle = "rgb(" + red + "," + green + "," + blue + ")";
+                ktx.fillRect(this.turingPosition.x,this.turingPosition.y,1,1);
+                this.turnLeft();
+            }
+            this.goForward();
+            this.steps++;
+            if((this.turingPosition.x == this.firstSetPosition.x) && (this.turingPosition.y == this.firstSetPosition.y) && (this.steps>100)){
+                this.turingPhase = Phase.FILL_THE_INSIDE;
+            }
+        },
+        getComplexNumberFromLatticeCoordsForMandelbrot: function (x,y){
+            var realX = -2.2 + ((3.2* x.valueOf())/this.MAX_X);
+            var imgY = -1.17 + ((2.34* y.valueOf())/this.MAX_Y);
+            return new ComplexNumber(realX,imgY);
+        },
+        turnRight: function (){
+            var newDirection;
+            switch (this.direction){
+                case Direction.UP:    newDirection=Direction.RIGHT; break;
+                case Direction.RIGHT: newDirection=Direction.DOWN; break;
+                case Direction.DOWN:  newDirection=Direction.LEFT; break;
+                case Direction.LEFT:  newDirection=Direction.UP; break;
+                default:newDirection=this.direction; break;
+            }
+            this.direction=newDirection;
+        },
+        turnLeft: function (){
+            var newDirection;
+            switch (this.direction){
+                case Direction.UP:    newDirection=Direction.LEFT; break;
+                case Direction.RIGHT: newDirection=Direction.UP; break;
+                case Direction.DOWN:  newDirection=Direction.RIGHT; break;
+                case Direction.LEFT:  newDirection=Direction.DOWN; break;
+                default:newDirection=this.direction; break;
+            }
+            this.direction=newDirection;
+        },
+        goForward: function (){
+            switch (this.direction){
+                case Direction.UP:
+                    this.turingPosition.y = this.turingPosition.y-1;
+                    break;
+                case Direction.RIGHT:
+                    this.turingPosition.x = this.turingPosition.x+1;
+                    break;
+                case Direction.DOWN:
+                    this.turingPosition.y = this.turingPosition.y+1;
+                    break;
+                case Direction.LEFT:
+                    this.turingPosition.x = this.turingPosition.x-1;
+                    break;
+                default:
+                    break;
+            }
+        },
+        fillTheInside: function(){
+            var start = new Point(this.firstSetPosition.x,this.firstSetPosition.y);
+            start.x = start.x - 10;
+            var pointStack = new Array();
+            pointStack.push(start);
+            while(pointStack.length > 0){
+                var p = pointStack.pop();
+                if(this.lattice[p.x][p.y]==this.YET_UNCOMPUTED){
+                    this.lattice[p.x][p.y]=0;
+                    pointStack.push(new Point(p.x-1,p.y));
+                    pointStack.push(new Point(p.x+1,p.y));
+                    pointStack.push(new Point(p.x,p.y-1));
+                    pointStack.push(new Point(p.x,p.y+1));
+                }
+            }
+            this.turingPhase=Phase.COLOR_THE_OUTSIDE;
+        },
+        colorTheOutside: function(){
+            for(var y=0;y<this.MAX_Y;y++){
+                for(var x=0;x<this.MAX_X;x++){
+                    if(this.lattice[x][y] == this.YET_UNCOMPUTED){
+                        var i = this.getComplexNumberFromLatticeCoordsForMandelbrot(x, y).computeMandelbrotIterations(this.MAX_ITERATIONS);
+                        var iterations = i.valueOf();
+                        if(this.MAX_ITERATIONS===iterations){
+                            this.lattice[x][y]=0;
+                        } else {
+                            this.lattice[x][y]=iterations;
+                        }
+                    }
+                }
+            }
+            this.turingPhase=Phase.ALL_DONE;
+        }
+    };
+
+    window.onload = function(){
+        data.init();
+        canvas = document.getElementById("mandelbrot");
+        ktx = canvas.getContext("2d");
+        data.paint();
+        while(data.turingPhase != Phase.FILL_THE_INSIDE){
+            data.step();
+        }
+        data.paint();
+        while(data.turingPhase != Phase.ALL_DONE){
+            data.step();
+            data.paint();
+        }
+    }
+</script>
+</body>
+</html>
