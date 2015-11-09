@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Thomas Wöhlke"/>
-    <meta name="description" content="Mandelbrot-Menge in HTML5 und JavaScript"/>
+    <meta name="description" content="Mandelbrot-Menge berechnet durch eine Turing-Maschine in HTML5 und JavaScript"/>
     <style>
         * {
             font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
@@ -29,11 +29,6 @@
 <script>
     var canvas;
     var ktx;
-
-    function sleep(milliseconds) {
-        var e = new Date().getTime() + (milliseconds);
-        while (new Date().getTime() <= e) {}
-    }
 
     var ComplexNumber = function (real,img){
         this.real=real;
@@ -58,11 +53,28 @@
         this.isNotDivergent = function (){
             return (( this.realZ*this.realZ + this.imgZ*this.imgZ ) < 4.0);
         };
+        this.computeJuliaIterations = function (maxIterations,cReal,cImg) {
+            var i = 0;
+            this.realZ = this.real;
+            this.imgZ = this.img;
+            var newRealZ;
+            var newImgZ;
+            do {
+                newRealZ = this.realZ*this.realZ - this.imgZ*this.imgZ + cReal;
+                newImgZ  = 2*this.realZ*this.imgZ + cImg;
+                this.realZ=newRealZ;
+                this.imgZ=newImgZ;
+                i++;
+            } while ((i<maxIterations) && this.isNotDivergent());
+            return i;
+        }
     };
 
     var Phase = { GO_TO_SET:0, WALK_AROUND:1, FILL_THE_INSIDE:2, COLOR_THE_OUTSIDE:3, ALL_DONE:4 };
 
     var Direction = { UP:0, RIGHT:1, DOWN:2, LEFT:3 };
+
+    var Status = { MANDELBROT_SET:0, JULIA_SET:1 };
 
     var Point = function(x,y){
         this.x = x;
@@ -89,7 +101,10 @@
         direction : Direction.LEFT,
         turingPosition : new Point(0,0),
         firstSetPosition: new Point(0,0),
+        status: Status.MANDELBROT_SET,
         init: function () {
+            this.turingPhase = Phase.GO_TO_SET;
+            this.direction = Direction.LEFT;
             this.turingPosition = new Point((this.MAX_X-2),((this.MAX_Y/2)-11));
             for(var x=0;x<this.MAX_X;x++){
                 this.lattice[x] = [];
@@ -97,8 +112,18 @@
                     this.lattice[x][y] = this.YET_UNCOMPUTED;
                 }
             }
+            this.palette = [];
             for (var i = 0; i <= this.MAX_ITERATIONS; i++) {
                 this.palette.push([verpacken(0), verpacken(0), verpacken((256/this.MAX_ITERATIONS)*i)]);
+            }
+            this.paint();
+            while(this.turingPhase != Phase.FILL_THE_INSIDE){
+                this.step();
+            }
+            this.paint();
+            while(this.turingPhase != Phase.ALL_DONE){
+                this.step();
+                this.paint();
             }
         },
         paint: function () {
@@ -236,22 +261,42 @@
                 }
             }
             this.turingPhase=Phase.ALL_DONE;
+        },
+        getComplexNumberFromLatticeCoordsForJulia: function(x,y){
+            var realX = -1.6 + (3.2*x)/this.MAX_X;
+            var imgY = -1.17 + (2.34*y)/this.MAX_Y;
+            return new ComplexNumber(realX,imgY);
+        },
+        clicked: function(xClick, yClick){
+            var newStatus;
+            if(this.status==Status.MANDELBROT_SET){
+                var c = this.getComplexNumberFromLatticeCoordsForMandelbrot(xClick, yClick);
+                for(var y=0;y<this.MAX_Y;y++) {
+                    for (var x = 0; x < this.MAX_X; x++) {
+                        var z = this.getComplexNumberFromLatticeCoordsForJulia(x, y);
+                        var iterations = z.computeJuliaIterations(this.MAX_ITERATIONS-1, c.real, c.img);
+                        this.lattice[x][y]=iterations;
+                    }
+                }
+                this.paint();
+                newStatus = Status.JULIA_SET;
+            } else {
+                newStatus = Status.MANDELBROT_SET;
+                this.init();
+            }
+            this.status = newStatus;
         }
     };
 
     window.onload = function(){
-        data.init();
         canvas = document.getElementById("mandelbrot");
         ktx = canvas.getContext("2d");
-        data.paint();
-        while(data.turingPhase != Phase.FILL_THE_INSIDE){
-            data.step();
-        }
-        data.paint();
-        while(data.turingPhase != Phase.ALL_DONE){
-            data.step();
-            data.paint();
-        }
+        data.init();
+        canvas.addEventListener('click', function(event) {
+            var x = event.pageX - canvas.offsetLeft,
+                y = event.pageY - canvas.offsetTop;
+            data.clicked(x,y);
+        }, false);
     }
 </script>
 </body>
