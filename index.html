@@ -1,25 +1,152 @@
 <!doctype html>
 <html lang="de">
 <head>
-    <title>HTML5, JavaScript and CSS3 Experiments</title>
+    <title>HTML5 - Der Zyklische Zelluläre Automat</title>
     <meta charset="utf-8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Thomas Wöhlke"/>
-    <meta name="description" content="Experimente mit HTML5, CSS3 und JavaScript"/>
+    <meta name="description" content="Der zelluläre Automat 'cyclic cellular automaton' von David Griffeath in HTML5"/>
+    <!-- Open Graph Meta Tags BEGIN -->
+    <meta content='HTML5 - Der Zyklische Zelluläre Automat' name='og:title'/>
+    <meta content='http://woehlke.org/html5-lab/cca/' name='og:url'/>
+    <meta content='Thomas Wöhlke' name='og:site_name'/>
+    <meta content='Der zelluläre Automat cyclic cellular automaton von David Griffeath in HTML5' name='og:description'/>
+    <!-- Open Graph Meta Tags END -->
+    <!-- twitter cards -->
+    <meta content='summary' name='twitter:card'/>
+    <meta content='@ThomasWoehlke' name='twitter:site'/>
+    <meta content='@ThomasWoehlke' name='twitter:creator'/>
+    <meta content='http://woehlke.org/html5-lab/cca/' name='twitter:url'/>
+    <meta content='Der zelluläre Automat cyclic cellular automaton von David Griffeath in HTML5' name='twitter:description'/>
+    <meta content='http://woehlke.org/phasenraum_logo.gif' name='twitter:image'/>
+    <meta content='Thomas Wöhlke - 20 Years Software Development for the Internet' name='twitter:title'/>
+    <!-- twitter cards -->
+    <link href="https://plus.google.com/+ThomasWöhlke/" rel="publisher">
+    <!-- twitter cards -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
     <style>
-        * {
-            font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+        canvas {
+            display: block;
+            border: 1px solid black;
+        }
+
+        p {
+            width: 300px;
         }
     </style>
 </head>
 <body>
-<h1>Experimente mit HTML5, CSS3 und JavaScript</h1>
+<div class="container">
+<h1>Der Zyklische Zelluläre Automat</h1>
+<canvas id="cca" width="300" height="300"></canvas>
+<br/>
+
+<p>Der zelluläre Automat »cyclic cellular automaton« von David Griffeath funktioniert nach folgendem Prinzip:
+    Der Zustand einer Zelle – repräsentiert durch die Nummern 0 bis n – 1, n ist die Anzahl der möglichen Zustände –
+    wird im nächsten Zyklus um eins erhöht, wenn einer ihrer vier Nachbarn sich in diesem um eins höheren Zustand befindet.
+    Dem entsprechend wird n – 1 zu 0, wenn eine der Nachbarzellen den Zustand 0 besitzt.
+    Die gegenüberliegenden Ränder des Zellgitters sind miteinander verbunden.</p>
+
+<h2>Benutzte HTML5-Konstrukte</h2>
 <ul>
-    <li><a href="cca/index.html">Der zelluläre Automat »cyclic cellular automaton« von David Griffeath</a></li>
-    <li><a href="mandelbrot/index.html">Mandelbrot-Menge</a></li>
-    <li><a href="xeno2d/index.html">Xeno 2D: Ein Rudel Schildkröten namens Archilles</a></li>
-    <li><a href="https://github.com/phasenraum2010/html5-lab">HTML5-Lab @ github</a></li>
+    <li><a href="http://de.wikipedia.org/wiki/Canvas_%28HTML-Element%29" title="HTML5 Canvas">Canvas</a><br/><br/></li>
+    <li><a href="http://en.wikipedia.org/wiki/Web_worker" title="HTML5 Web Worker">Web Worker</a><br/><br/></li>
 </ul>
+
+<h2>Literatur</h2>
+
+<p>Spektrum der Wissenschaft, Oktober 1989, S. 10</p>
+
+<h2>Links</h2>
+<ul>
+    <li><a href="http://de.wikipedia.org/wiki/Zellulärer_Automat">de.wikipedia.org/wiki/Zellulärer_Automat</a><br/><br/></li>
+    <li><a href="http://en.wikipedia.org/wiki/Cyclic_cellular_automaton">en.wikipedia.org/wiki/Cyclic_cellular_automaton</a><br/><br/></li>
+</ul>
+<a href="..">&lt;&lt;&lt; zurück</a>
+</div>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script>
+    var canvas;
+    var ktx;
+    var worker;
+
+    var job = {
+        palette :   [],
+        lattice:    [],
+        current:    0,
+        MAX_STATUS: 16,
+        MAX_X:      300,
+        MAX_Y:      300
+    };
+
+    function init() {
+        for(var generation=0;generation<2;generation++){
+            job.lattice[generation] = [];
+            for(var x=0;x<job.MAX_X;x++){
+                job.lattice[generation][x] = [];
+                for(var y=0;y<job.MAX_Y;y++){
+                    var myvalue =Math.floor(Math.random() * job.MAX_STATUS);
+                    if(myvalue <0 ) myvalue *= -1;
+                    job.lattice[generation][x][y] = myvalue;
+                }
+            }
+        }
+    }
+
+    function paint(){
+        for(var x=0;x<job.MAX_X;x++){
+            for(var y=0;y<job.MAX_Y;y++){
+                var myvalue = job.lattice[job.current][x][y];
+                var red = job.palette[myvalue][0];
+                var green = job.palette[myvalue][1];
+                var blue = job.palette[myvalue][2];
+                ktx.fillStyle = "rgb("+red+","+green+","+blue+")";
+                ktx.fillRect(x,y,1,1);
+            }
+        }
+    }
+
+    function erstellePalette() {
+        function verpacken(x) {
+            x = ((x + 256) & 0x1ff) - 256;
+            if (x < 0) x = -x;
+            return x;
+        }
+        for (var i = 0; i <= job.MAX_STATUS; i++) {
+            job.palette.push([verpacken(15*i), verpacken(0), verpacken(255-(15*i))]);
+        }
+    }
+
+    window.onload = function(){
+        erstellePalette();
+        this.init();
+        canvas = document.getElementById("cca");
+        ktx = canvas.getContext("2d");
+        paint();
+        worker = new Worker("worker.js");
+        worker.onmessage = function(event) {
+            job = event.data;
+            paint();
+            worker.postMessage(job);
+        }
+        worker.postMessage(job);
+    }
+</script>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-17174370-1', 'woehlke.org');
+    ga('send', 'pageview');
+</script>
 </body>
 </html>

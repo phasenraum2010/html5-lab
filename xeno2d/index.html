@@ -1,37 +1,58 @@
 <!doctype html>
 <html lang="de">
 <head>
-    <title>Xeno 2D: Ein Rudel Schildkröten namens Archilles</title>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Xeno 2D: Ein Rudel Schildkröten namens Archilles</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Thomas Wöhlke"/>
-    <meta name="description" content="Mäuseglück in HTML5"/>
+    <meta name="description" content="Mäuseglück in HTML5"/><!-- Open Graph Meta Tags BEGIN -->
+    <meta content='HTML5 - Xeno 2D: Ein Rudel Schildkröten namens Archilles' name='og:title'/>
+    <meta content='http://woehlke.org/html5-lab/xeno2d/' name='og:url'/>
+    <meta content='Thomas Wöhlke' name='og:site_name'/>
+    <meta content='Xeno 2D: Ein Rudel Schildkröten namens Archilles' name='og:description'/>
+    <!-- Open Graph Meta Tags END -->
+    <!-- twitter cards -->
+    <meta content='summary' name='twitter:card'/>
+    <meta content='@ThomasWoehlke' name='twitter:site'/>
+    <meta content='@ThomasWoehlke' name='twitter:creator'/>
+    <meta content='http://woehlke.org/html5-lab/xeno2d/' name='twitter:url'/>
+    <meta content='Mäuseglück in HTML5' name='twitter:description'/>
+    <meta content='http://woehlke.org/phasenraum_logo.gif' name='twitter:image'/>
+    <meta content='Xeno 2D: Ein Rudel Schildkröten namens Archilles' name='twitter:title'/>
+    <!-- twitter cards -->
+    <link href="https://plus.google.com/+ThomasWöhlke/" rel="publisher">
+    <!-- twitter cards -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
     <style>
-        * {
-            font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
-        }
-
         canvas {
             display: block;
             border: 1px solid black;
         }
 
         p {
-            width: 600px;
+            width: 300px;
         }
     </style>
 </head>
 <body>
+<div class="container">
 <h1>Xeno 2D</h1>
 <h2>Ein Rudel Schildkröten namens Archilles</h2>
-<p>Clicken Sie ein paar Punkte in die Malfläche und drücken sie dann Start.</p>
+<p>Klicken Sie ein paar Punkte in die Malfläche und drücken sie dann Start.</p>
 <p>Durch Variieren von Anzahl, Position und Reihenfolge der Punkte lassen sich schöne Grafiken erstellen.
     Diese können Sie mit Rechtsklick auf die Malfläche dann auch als Bild herunter laden.</p>
-<canvas id="mice" width="600" height="600"></canvas>
-<button id="start" name="Start">Start</button>
+<canvas id="mice" width="300" height="300"></canvas>
+<br/><br/>
+<button id="start" name="Start" class="btn btn-default">Start</button>
 <br/>
-
+<br/>
+<a href="..">&lt;&lt;&lt; zurück</a>
+</div>
 <script>
     var canvas;
     var ktx;
@@ -120,6 +141,20 @@
         btn.addEventListener('click', drawLines ,false);
 
     }
+</script>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-17174370-1', 'woehlke.org');
+    ga('send', 'pageview');
 </script>
 </body>
 </html>
