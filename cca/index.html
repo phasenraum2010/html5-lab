@@ -7,11 +7,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Thomas Wöhlke"/>
     <meta name="description" content="Der zelluläre Automat 'cyclic cellular automaton' von David Griffeath in HTML5"/>
+    <!-- Open Graph Meta Tags BEGIN -->
+    <meta content='HTML5 - Der Zyklische Zelluläre Automat' name='og:title'/>
+    <meta content='http://woehlke.org/html5-lab/cca/' name='og:url'/>
+    <meta content='Thomas Wöhlke' name='og:site_name'/>
+    <meta content='Der zelluläre Automat cyclic cellular automaton von David Griffeath in HTML5' name='og:description'/>
+    <!-- Open Graph Meta Tags END -->
+    <!-- twitter cards -->
+    <meta content='summary' name='twitter:card'/>
+    <meta content='@ThomasWoehlke' name='twitter:site'/>
+    <meta content='@ThomasWoehlke' name='twitter:creator'/>
+    <meta content='http://woehlke.org/html5-lab/cca/' name='twitter:url'/>
+    <meta content='Der zelluläre Automat cyclic cellular automaton von David Griffeath in HTML5' name='twitter:description'/>
+    <meta content='http://woehlke.org/phasenraum_logo.gif' name='twitter:image'/>
+    <meta content='Thomas Wöhlke - 20 Years Software Development for the Internet' name='twitter:title'/>
+    <!-- twitter cards -->
+    <link href="https://plus.google.com/+ThomasWöhlke/" rel="publisher">
+    <!-- twitter cards -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
     <style>
-        * {
-            font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
-        }
-
         canvas {
             display: block;
             border: 1px solid black;
@@ -23,6 +40,7 @@
     </style>
 </head>
 <body>
+<div class="container">
 <h1>Der Zyklische Zelluläre Automat</h1>
 <canvas id="cca" width="300" height="300"></canvas>
 <br/>
@@ -35,8 +53,8 @@
 
 <h2>Benutzte HTML5-Konstrukte</h2>
 <ul>
-    <li><a href="http://de.wikipedia.org/wiki/Canvas_%28HTML-Element%29" title="HTML5 Canvas">Canvas</a></li>
-    <li><a href="http://en.wikipedia.org/wiki/Web_worker" title="HTML5 Web Worker">Web Worker</a></li>
+    <li><a href="http://de.wikipedia.org/wiki/Canvas_%28HTML-Element%29" title="HTML5 Canvas">Canvas</a><br/><br/></li>
+    <li><a href="http://en.wikipedia.org/wiki/Web_worker" title="HTML5 Web Worker">Web Worker</a><br/><br/></li>
 </ul>
 
 <h2>Literatur</h2>
@@ -45,9 +63,15 @@
 
 <h2>Links</h2>
 <ul>
-    <li><a href="http://de.wikipedia.org/wiki/Zellulärer_Automat">de.wikipedia.org/wiki/Zellulärer_Automat</a></li>
-    <li><a href="http://en.wikipedia.org/wiki/Cyclic_cellular_automaton">en.wikipedia.org/wiki/Cyclic_cellular_automaton</a></li>
+    <li><a href="http://de.wikipedia.org/wiki/Zellulärer_Automat">de.wikipedia.org/wiki/Zellulärer_Automat</a><br/><br/></li>
+    <li><a href="http://en.wikipedia.org/wiki/Cyclic_cellular_automaton">en.wikipedia.org/wiki/Cyclic_cellular_automaton</a><br/><br/></li>
 </ul>
+<a href="..">&lt;&lt;&lt; zurück</a>
+</div>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script>
     var canvas;
     var ktx;
@@ -114,6 +138,15 @@
         }
         worker.postMessage(job);
     }
+</script>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-17174370-1', 'woehlke.org');
+    ga('send', 'pageview');
 </script>
 </body>
 </html>
